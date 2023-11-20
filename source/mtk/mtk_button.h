@@ -34,12 +34,19 @@
 
 #if MTK_ENABLE_COMPONENT_BUTTON
 
+#define MTK_BTN_EVT_NONE        0
+#define MTK_BTN_EVT_DOWN        1
+#define MTK_BTN_EVT_UP          2
+#define MTK_BTN_EVT_N_CLICKS    3
+#define MTK_BTN_EVT_HOLD        4
+#define MTK_BTN_EVT_HOLD_UP     5
+
 typedef void (*mtk_btn_cb)(void*);
 typedef uint8_t (*mtk_btn_read)(void*);
+
 typedef struct mtk_button
 {
     struct mtk_button* next;
-    uint8_t id;
 
     mtk_btn_read  read;
     mtk_btn_cb    cb;
@@ -69,19 +76,50 @@ extern "C" {
 
 void mtk_button_manager_init (uint32_t call_freq_hz, uint32_t scan_hz);
 void mtk_button_init (mtk_button_t* btn,
-                      uint8_t       id,
                       uint16_t      max_combo_gap_ms,
                       uint16_t      hold_start_ms,
                       uint8_t       low_valid,
                       mtk_btn_read  read,
                       mtk_btn_cb    cb);
 void mtk_button_scan (void);
-uint8_t mtk_button_evt_down (mtk_button_t* btn);
-uint8_t mtk_button_evt_up (mtk_button_t* btn);
-uint8_t mtk_button_evt_holdup (mtk_button_t* btn);
-uint8_t mtk_button_evt_holddown (mtk_button_t* btn);
-uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks);
-uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration);
+
+static inline uint8_t mtk_button_evt_down (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_DOWN);
+}
+
+static inline uint8_t mtk_button_evt_up (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_UP);
+}
+
+static inline uint8_t mtk_button_evt_holdup (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_HOLD_UP);
+}
+
+static inline uint8_t mtk_button_evt_holddown (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_HOLD);
+}
+
+static inline uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks)
+{
+    if (btn->event == MTK_BTN_EVT_N_CLICKS) {
+        return ((uint32_t)(btn->click_cnt) == nClicks);
+    }
+
+    return MTK_FALSE;
+}
+
+static inline uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration)
+{
+    if (btn->event == MTK_BTN_EVT_HOLD) {
+        return ((uint32_t)(btn->active_cnt) == duration / btn_mgr.period);
+    }
+
+    return MTK_FALSE;
+}
 
 #endif /* MTK_ENABLE_COMPONENT_BUTTON */
 

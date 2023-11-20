@@ -34,13 +34,6 @@
 #define MTK_BTN_STA_ACTIVE      1
 #define MTK_BTN_STA_CLICK       2
 
-#define MTK_BTN_EVT_NONE        0
-#define MTK_BTN_EVT_DOWN        1
-#define MTK_BTN_EVT_UP          2
-#define MTK_BTN_EVT_N_CLICKS    3
-#define MTK_BTN_EVT_HOLD        4
-#define MTK_BTN_EVT_HOLD_UP     5
-
 #define MTK_BTN_CB(btn, evt)        \
         do {                        \
             btn->event = evt;       \
@@ -66,7 +59,6 @@ void mtk_button_manager_init (uint32_t call_freq_hz, uint32_t scan_hz)
 }
 
 void mtk_button_init (mtk_button_t* btn,
-                      uint8_t       id,
                       uint16_t      max_combo_gap_ms,
                       uint16_t      hold_start_ms,
                       uint8_t       low_valid,
@@ -92,7 +84,6 @@ void mtk_button_init (mtk_button_t* btn,
     btn->next = btn_mgr.btn_head;
     btn_mgr.btn_head = btn;
 
-    btn->id = id;
     btn->max_combo_gap = max_combo_gap_ms / btn_mgr.period;
     btn->hold_start_tick = hold_start_ms / btn_mgr.period;
     btn->low_valid = low_valid;
@@ -189,44 +180,6 @@ void mtk_button_scan (void)
         __mtk_btn_process();
         cnt = 0;
     }
-}
-
-uint8_t mtk_button_evt_down (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_DOWN);
-}
-
-uint8_t mtk_button_evt_up (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_UP);
-}
-
-uint8_t mtk_button_evt_holdup (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_HOLD_UP);
-}
-
-uint8_t mtk_button_evt_holddown (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_HOLD);
-}
-
-uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks)
-{
-    if (btn->event == MTK_BTN_EVT_N_CLICKS) {
-        return ((uint32_t)(btn->click_cnt) == nClicks);
-    }
-
-    return MTK_FALSE;
-}
-
-uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration)
-{
-    if (btn->event == MTK_BTN_EVT_HOLD) {
-        return ((uint32_t)(btn->active_cnt) == duration / btn_mgr.period);
-    }
-
-    return MTK_FALSE;
 }
 
 #endif /* MTK_ENABLE_COMPONENT_BUTTON */
