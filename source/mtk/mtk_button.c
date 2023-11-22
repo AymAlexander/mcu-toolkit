@@ -34,6 +34,13 @@
 #define MTK_BTN_STA_ACTIVE      1
 #define MTK_BTN_STA_CLICK       2
 
+#define MTK_BTN_EVT_NONE        0
+#define MTK_BTN_EVT_DOWN        1
+#define MTK_BTN_EVT_UP          2
+#define MTK_BTN_EVT_N_CLICKS    3
+#define MTK_BTN_EVT_HOLD        4
+#define MTK_BTN_EVT_HOLD_UP     5
+
 #define MTK_BTN_CB(btn, evt)        \
         do {                        \
             btn->event = evt;       \
@@ -96,11 +103,7 @@ static void __mtk_btn_readall (void)
     mtk_button_t* btn = NULL;
 
     for (btn = btn_mgr.btn_head; btn != NULL; btn = btn->next) {
-        btn->prev_rt_sta = btn->rt_sta;
-        btn->rt_sta = btn->read(btn)^btn->low_valid;
-        if (btn->rt_sta == btn->prev_rt_sta) {
-            btn->fix_sta = btn->rt_sta;
-        }
+        btn->rt_state = btn->read(btn)^btn->low_valid;
     }
 }
 
@@ -180,6 +183,44 @@ void mtk_button_scan (void)
         __mtk_btn_process();
         cnt = 0;
     }
+}
+
+inline uint8_t mtk_button_evt_down (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_DOWN);
+}
+
+inline uint8_t mtk_button_evt_up (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_UP);
+}
+
+inline uint8_t mtk_button_evt_holdup (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_HOLD_UP);
+}
+
+inline uint8_t mtk_button_evt_holddown (mtk_button_t* btn)
+{
+    return (btn->event == MTK_BTN_EVT_HOLD);
+}
+
+inline uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks)
+{
+    if (btn->event == MTK_BTN_EVT_N_CLICKS) {
+        return ((uint32_t)(btn->click_cnt) == nClicks);
+    }
+
+    return MTK_FALSE;
+}
+
+inline uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration)
+{
+    if (btn->event == MTK_BTN_EVT_HOLD) {
+        return ((uint32_t)(btn->active_cnt) == duration / btn_mgr.period);
+    }
+
+    return MTK_FALSE;
 }
 
 #endif /* MTK_ENABLE_COMPONENT_BUTTON */

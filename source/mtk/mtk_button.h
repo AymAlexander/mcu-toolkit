@@ -34,13 +34,6 @@
 
 #if MTK_ENABLE_COMPONENT_BUTTON
 
-#define MTK_BTN_EVT_NONE        0
-#define MTK_BTN_EVT_DOWN        1
-#define MTK_BTN_EVT_UP          2
-#define MTK_BTN_EVT_N_CLICKS    3
-#define MTK_BTN_EVT_HOLD        4
-#define MTK_BTN_EVT_HOLD_UP     5
-
 typedef void (*mtk_btn_cb)(void*);
 typedef uint8_t (*mtk_btn_read)(void*);
 
@@ -57,13 +50,10 @@ typedef struct mtk_button
 
     uint16_t hold_start_tick;
 
-    uint8_t fix_sta      :4;           /* after debounce  */
-    uint8_t rt_sta       :2;           /* real time value */
-    uint8_t prev_rt_sta  :2;
-
-    uint8_t low_valid    :1;
-    uint8_t event        :4;
-    uint8_t status       :3;
+    uint32_t rt_state    :1;
+    uint32_t low_valid   :1;
+    uint32_t event       :15;
+    uint32_t status      :15;
 } mtk_button_t;
 
 #endif /* MTK_ENABLE_COMPONENT_BUTTON */
@@ -82,44 +72,12 @@ void mtk_button_init (mtk_button_t* btn,
                       mtk_btn_read  read,
                       mtk_btn_cb    cb);
 void mtk_button_scan (void);
-
-static inline uint8_t mtk_button_evt_down (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_DOWN);
-}
-
-static inline uint8_t mtk_button_evt_up (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_UP);
-}
-
-static inline uint8_t mtk_button_evt_holdup (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_HOLD_UP);
-}
-
-static inline uint8_t mtk_button_evt_holddown (mtk_button_t* btn)
-{
-    return (btn->event == MTK_BTN_EVT_HOLD);
-}
-
-static inline uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks)
-{
-    if (btn->event == MTK_BTN_EVT_N_CLICKS) {
-        return ((uint32_t)(btn->click_cnt) == nClicks);
-    }
-
-    return MTK_FALSE;
-}
-
-static inline uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration)
-{
-    if (btn->event == MTK_BTN_EVT_HOLD) {
-        return ((uint32_t)(btn->active_cnt) == duration / btn_mgr.period);
-    }
-
-    return MTK_FALSE;
-}
+uint8_t mtk_button_evt_down (mtk_button_t* btn);
+uint8_t mtk_button_evt_up (mtk_button_t* btn);
+uint8_t mtk_button_evt_holdup (mtk_button_t* btn);
+uint8_t mtk_button_evt_holddown (mtk_button_t* btn);
+uint8_t mtk_button_evt_clicks (mtk_button_t* btn, uint32_t nClicks);
+uint8_t mtk_button_evt_hold_ms (mtk_button_t* btn, uint32_t duration);
 
 #endif /* MTK_ENABLE_COMPONENT_BUTTON */
 
