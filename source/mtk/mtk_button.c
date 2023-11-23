@@ -120,7 +120,7 @@ static void __mtk_btn_process (void)
 
         switch (btn->status) {
         case MTK_BTN_STA_RELEASE:
-            if (btn->fix_sta == MTK_TRUE) {
+            if (btn->rt_state == MTK_TRUE) {
                 btn->active_cnt = 0;
                 btn->click_cnt = 0;
 
@@ -133,7 +133,7 @@ static void __mtk_btn_process (void)
             break;
 
         case MTK_BTN_STA_ACTIVE:
-            if (btn->fix_sta == MTK_TRUE) {
+            if (btn->rt_state == MTK_TRUE) {
                 if (btn->click_cnt > 0) {
                     if (btn->active_cnt >= btn->max_combo_gap) {
                         MTK_BTN_CB(btn, MTK_BTN_EVT_N_CLICKS);
@@ -157,7 +157,7 @@ static void __mtk_btn_process (void)
             break;
 
         case MTK_BTN_STA_CLICK:
-            if (btn->fix_sta == MTK_TRUE) {
+            if (btn->rt_state == MTK_TRUE) {
                 MTK_BTN_CB(btn, MTK_BTN_EVT_DOWN);
                 btn->status = MTK_BTN_STA_ACTIVE;
                 btn->active_cnt = 0;
